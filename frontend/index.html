@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HealthPulse Dashboard</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="hero-card">
+        <div>
+          <p class="eyebrow">Smart patient monitoring</p>
+          <h1>HealthPulse Dashboard</h1>
+          <p class="hero-copy">
+            Capture health metrics, review patient trends, and get AI-powered risk remarks in a single place.
+          </p>
+        </div>
+        <div class="hero-badge">Live insights</div>
+      </header>
+
+      <section class="stats-grid" id="statsGrid">
+        <article class="stat-card accent-blue">
+          <h3>Total patients</h3>
+          <p class="stat-value" id="totalPatients">0</p>
+        </article>
+        <article class="stat-card accent-red">
+          <h3>High risk</h3>
+          <p class="stat-value" id="highRisk">0</p>
+        </article>
+        <article class="stat-card accent-amber">
+          <h3>Moderate risk</h3>
+          <p class="stat-value" id="moderateRisk">0</p>
+        </article>
+        <article class="stat-card accent-green">
+          <h3>Low risk</h3>
+          <p class="stat-value" id="lowRisk">0</p>
+        </article>
+      </section>
+
+      <section class="content-grid">
+        <article class="card form-card">
+          <div class="card-header">
+            <div>
+              <p class="eyebrow">Patient intake</p>
+              <h2 id="formTitle">Add patient record</h2>
+            </div>
+            <button class="secondary-btn" id="resetBtn" type="button">Reset</button>
+          </div>
+
+          <form id="patientForm" novalidate>
+            <input type="hidden" id="patientId" />
+            <div class="form-grid">
+              <label>
+                <span>Full name</span>
+                <input id="fullName" name="fullName" placeholder="Enter full name" required />
+              </label>
+              <label>
+                <span>Date of birth</span>
+                <input id="dob" name="dob" type="date" required />
+              </label>
+              <label>
+                <span>Email</span>
+                <input id="email" name="email" type="email" placeholder="name@example.com" required />
+              </label>
+              <label>
+                <span>Glucose (mg/dL)</span>
+                <input id="glucose" name="glucose" type="number" step="0.01" placeholder="e.g. 92" required />
+              </label>
+              <label>
+                <span>Haemoglobin (g/dL)</span>
+                <input id="haemoglobin" name="haemoglobin" type="number" step="0.01" placeholder="e.g. 13.4" required />
+              </label>
+              <label>
+                <span>Cholesterol (mg/dL)</span>
+                <input id="cholesterol" name="cholesterol" type="number" step="0.01" placeholder="e.g. 180" required />
+              </label>
+            </div>
+            <p class="form-hint">Validation includes email format, future-date prevention, and numeric blood metrics.</p>
+            <p id="formMessage" class="form-message" role="status"></p>
+            <button class="primary-btn" type="submit">Save patient</button>
+          </form>
+        </article>
+
+        <article class="card table-card">
+          <div class="card-header">
+            <div>
+              <p class="eyebrow">Patient records</p>
+              <h2>Tracked patients</h2>
+            </div>
+            <div class="actions">
+              <input id="searchInput" type="search" placeholder="Search by name or email" />
+              <button class="secondary-btn" id="exportBtn" type="button">Export CSV</button>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Risk</th>
+                  <th>Remarks</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="patientTableBody"></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+    </div>
+
+    <script src="/script.js"></script>
+  </body>
+</html>
