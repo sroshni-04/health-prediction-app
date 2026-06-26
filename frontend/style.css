@@ -247,6 +247,11 @@ th {
   cursor: pointer;
 }
 
+.view-btn {
+  background: rgba(79, 140, 255, 0.16);
+  color: var(--primary);
+}
+
 .edit-btn {
   background: rgba(40, 215, 181, 0.14);
   color: var(--primary-2);
@@ -255,6 +260,57 @@ th {
 .delete-btn {
   background: rgba(255, 107, 107, 0.14);
   color: var(--danger);
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 7, 17, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 20;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-card {
+  width: min(720px, 100%);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: var(--shadow);
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.details-grid > div {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px;
+}
+
+.details-grid .full-width {
+  grid-column: 1 / -1;
+}
+
+.detail-label {
+  display: block;
+  color: var(--muted);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  margin-bottom: 6px;
 }
 
 .empty-state {

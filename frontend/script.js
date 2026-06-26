@@ -6,6 +6,11 @@ const searchInput = document.getElementById("searchInput");
 const resetBtn = document.getElementById("resetBtn");
 const exportBtn = document.getElementById("exportBtn");
 const tableBody = document.getElementById("patientTableBody");
+const loadingState = document.getElementById("loadingState");
+const detailsModal = document.getElementById("detailsModal");
+const closeModalBtn = document.getElementById("closeModalBtn");
+const detailsContent = document.getElementById("detailsContent");
+const detailsTitle = document.getElementById("detailsTitle");
 
 const statElements = {
   totalPatients: document.getElementById("totalPatients"),
@@ -19,6 +24,32 @@ const apiBase = "/api";
 function showMessage(text, isError = false) {
   formMessage.textContent = text;
   formMessage.style.color = isError ? "#ffb84d" : "#3bd588";
+}
+
+function setLoading(isLoading) {
+  loadingState.style.display = isLoading ? "block" : "none";
+}
+
+function openDetailsModal(patient) {
+  detailsTitle.textContent = `${patient.full_name} • Patient details`;
+  detailsContent.innerHTML = `
+    <div class="details-grid">
+      <div><span class="detail-label">Full name</span><p>${escapeHtml(patient.full_name || "—")}</p></div>
+      <div><span class="detail-label">Date of birth</span><p>${escapeHtml(patient.dob || "—")}</p></div>
+      <div><span class="detail-label">Email address</span><p>${escapeHtml(patient.email || "—")}</p></div>
+      <div><span class="detail-label">Glucose</span><p>${escapeHtml(patient.glucose ?? "—")}</p></div>
+      <div><span class="detail-label">Haemoglobin</span><p>${escapeHtml(patient.haemoglobin ?? "—")}</p></div>
+      <div><span class="detail-label">Cholesterol</span><p>${escapeHtml(patient.cholesterol ?? "—")}</p></div>
+      <div class="full-width"><span class="detail-label">AI-generated remarks</span><p>${escapeHtml(patient.remarks || "—")}</p></div>
+    </div>
+  `;
+  detailsModal.classList.remove("hidden");
+  detailsModal.setAttribute("aria-hidden", "false");
+}
+
+function closeDetailsModal() {
+  detailsModal.classList.add("hidden");
+  detailsModal.setAttribute("aria-hidden", "true");
 }
 
 function resetForm() {
@@ -38,9 +69,19 @@ async function loadDashboard() {
 }
 
 async function loadPatients(query = "") {
-  const response = await fetch(`${apiBase}/patients?q=${encodeURIComponent(query)}`);
-  const data = await response.json();
-  renderTable(data);
+  setLoading(true);
+  try {
+    const response = await fetch(`${apiBase}/patients?q=${encodeURIComponent(query)}`);
+    if (!response.ok) {
+      throw new Error("Unable to load patients");
+    }
+    const data = await response.json();
+    renderTable(data);
+  } catch (error) {
+    tableBody.innerHTML = '<tr><td colspan="5" class="empty-state">Unable to load patients right now.</td></tr>';
+  } finally {
+    setLoading(false);
+  }
 }
 
 function renderTable(patients) {
@@ -55,10 +96,11 @@ function renderTable(patients) {
         <tr>
           <td>${escapeHtml(patient.full_name)}</td>
           <td>${escapeHtml(patient.email)}</td>
-          <td style="font-weight: bold;"> ${escapeHtml(patient.risk_level)}</td>
+          <td class="risk-${(patient.risk_level || "low").toLowerCase()}">${escapeHtml(patient.risk_level || "Low")}</td>
           <td>${escapeHtml(patient.remarks)}</td>
           <td>
             <div class="table-actions">
+              <button class="view-btn" data-id="${patient.id}" type="button">View</button>
               <button class="edit-btn" data-id="${patient.id}" type="button">Edit</button>
               <button class="delete-btn" data-id="${patient.id}" type="button">Delete</button>
             </div>
@@ -90,6 +132,16 @@ async function loadPatientIntoForm(id) {
   patientIdInput.value = patient.id;
   formTitle.textContent = "Edit patient record";
   showMessage("Editing existing record.");
+}
+
+async function viewPatient(id) {
+  const response = await fetch(`${apiBase}/patients/${id}`);
+  if (!response.ok) {
+    showMessage("Unable to load patient details.", true);
+    return;
+  }
+  const patient = await response.json();
+  openDetailsModal(patient);
 }
 
 function validateForm() {
@@ -173,6 +225,11 @@ tableBody.addEventListener("click", async (event) => {
   if (!button) return;
 
   const patientId = button.getAttribute("data-id");
+  if (button.classList.contains("view-btn")) {
+    await viewPatient(patientId);
+    return;
+  }
+
   if (button.classList.contains("edit-btn")) {
     await loadPatientIntoForm(patientId);
     return;
@@ -191,6 +248,12 @@ searchInput.addEventListener("input", () => {
 });
 
 resetBtn.addEventListener("click", resetForm);
+closeModalBtn.addEventListener("click", closeDetailsModal);
+detailsModal.addEventListener("click", (event) => {
+  if (event.target === detailsModal) {
+    closeDetailsModal();
+  }
+});
 
 exportBtn.addEventListener("click", () => {
   window.location.href = `${apiBase}/export/csv`;

@@ -7,22 +7,19 @@ from typing import Any, Dict, List, Tuple
 
 from flask import Flask, Response, jsonify, request, send_from_directory
 from flask_cors import CORS
-from supabase_client import get_supabase_client
+
+try:
+    from .supabase_client import get_supabase_client
+except ImportError:  # pragma: no cover - fallback for script execution
+    from supabase_client import get_supabase_client
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 FRONTEND_DIR = BASE_DIR / "frontend"
+DIST_DIR = FRONTEND_DIR / "dist"
 
-from flask import Flask
-app = Flask(
-    __name__,
-      static_folder=str(FRONTEND_DIR), 
-      static_url_path=""
-      )
+app = Flask(__name__)
 CORS(app)
 app.config["JSON_SORT_KEYS"] = False
-@app.route("/")
-def home():
-    return send_from_directory(FRONTEND_DIR, "index.html")
 
 
 def serialize_patient(row: Dict[str, Any]) -> Dict[str, Any]:
@@ -203,11 +200,6 @@ def build_remarks(glucose: float, haemoglobin: float, cholesterol: float) -> str
     return "The reported values appear broadly within a healthy range, though routine monitoring remains important."
 
 
-@app.route("/")
-def index() -> str:
-    return send_from_directory(FRONTEND_DIR, "index.html")
-
-
 @app.route("/api/patients", methods=["GET", "POST"])
 def patients_collection():
     print("PATIENT API CALLED")
@@ -339,11 +331,23 @@ def export_csv():
     )
 
 
-@app.route("/<path:filename>")
-def serve_frontend(filename: str):
-    if filename.startswith("api/"):
+@app.route("/api/<path:subpath>")
+def api_not_found(subpath: str):
+    return jsonify({"error": "Not found"}), 404
+
+
+@app.route("/", defaults={"path": ""})
+@app.route("/<path:path>")
+def serve_frontend(path: str):
+    if path.startswith("api/"):
         return jsonify({"error": "Not found"}), 404
-    return send_from_directory(FRONTEND_DIR, filename)
+
+    if path:
+        asset_path = Path(DIST_DIR) / path
+        if asset_path.exists():
+            return send_from_directory(str(DIST_DIR), path)
+
+    return send_from_directory(DIST_DIR, "index.html")
 
 
 if __name__ == "__main__":
