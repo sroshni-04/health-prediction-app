@@ -19,7 +19,7 @@ const statElements = {
   lowRisk: document.getElementById("lowRisk"),
 };
 
-const apiBase = 
+const API_BASE = 
 "https://health-prediction-backend-z8pk.onrender.com/api";
 
 function showMessage(text, isError = false) {
