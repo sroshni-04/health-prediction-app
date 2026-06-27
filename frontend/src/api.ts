@@ -1,6 +1,7 @@
 import type { Patient, PatientFormValues } from './types';
 
-const API_BASE = '/api';
+const API_BASE = 
+'https://health-prediction-backend-z8pk.onrender.com/api';
 
 export async function fetchPatients(query = ''): Promise<Patient[]> {
   const url = `${API_BASE}/patients${query ? `?q=${encodeURIComponent(query)}` : ''}`;
