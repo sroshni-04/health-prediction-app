@@ -5,7 +5,7 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
-from flask import Flask, Response, jsonify, request, send_from_directory
+from flask import Flask, Response, jsonify, request
 from flask_cors import CORS
 
 try:
@@ -331,23 +331,14 @@ def export_csv():
     )
 
 
+@app.route("/api/health")
+def health_check():
+    return jsonify({"status": "ok"})
+
+
 @app.route("/api/<path:subpath>")
 def api_not_found(subpath: str):
     return jsonify({"error": "Not found"}), 404
-
-
-@app.route("/", defaults={"path": ""})
-@app.route("/<path:path>")
-def serve_frontend(path: str):
-    if path.startswith("api/"):
-        return jsonify({"error": "Not found"}), 404
-
-    if path:
-        asset_path = Path(DIST_DIR) / path
-        if asset_path.exists():
-            return send_from_directory(str(DIST_DIR), path)
-
-    return send_from_directory(DIST_DIR, "index.html")
 
 
 if __name__ == "__main__":
